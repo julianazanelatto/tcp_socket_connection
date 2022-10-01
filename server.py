@@ -17,7 +17,7 @@ import socket
 
 SERVER_IP = ''   # listen in all the interfaces
 SERVER_PORT = 8000  # connection port
-LISTENING_PORT = 1024  # receiving port
+BUFFER = 1024  # receiving buffer for messages
 
 
 def bind_to_the_server():
@@ -74,7 +74,7 @@ def listening(tcp_connection, ip_client):
     """
     print("If you wanna terminate the connection type exit\n")
     while True:
-        recv_message = tcp_connection.recv(LISTENING_PORT)
+        recv_message = tcp_connection.recv(BUFFER)
         if recv_message is not None and recv_message != 'exit':
             print(f" Client {ip_client} message:\n {recv_message}")
         if recv_message == 'exit':
