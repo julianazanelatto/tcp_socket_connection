@@ -72,10 +72,14 @@ def listening(tcp_connection, ip_client):
     :return: the messages through the print function
 
     """
+    print("If you wanna terminate the connection type exit\n")
     while True:
         recv_message = tcp_connection.recv(LISTENING_PORT)
-        if recv_message is not None:
+        if recv_message is not None and recv_message != 'exit':
             print(f" Client {ip_client} message:\n {recv_message}")
+        if recv_message == 'exit':
+            # The client can terminate the connection
+            close_connection()
 
     # else: do nothing
 
@@ -89,11 +93,10 @@ if __name__ == '__main__':
     client = client_confirmation(current_connection)
     listening(current_connection, client)
 
-    # continue or exit?
-    close_connection()
-
     # if the connection wasn't closed
     try:
         current_connection.close()
     except ConnectionError as err:
-        print("The TCP Connection is end")
+        # the connection is already closed
+        pass
+    exit()
