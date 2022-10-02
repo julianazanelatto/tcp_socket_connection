@@ -32,9 +32,6 @@ def bind_to_the_server():
     tcp_connection.bind(socket_server)
     tcp_connection.listen(1)
 
-    # continue or exit?
-    close_connection()
-
     return tcp_connection
 
 
@@ -44,9 +41,9 @@ def client_confirmation(tcp_connection):
     :param tcp_connection:
     :return:
     """
-    connection, ip_client = current_connection.accept()
-    print(f"\nThe client with {ip_client} ip has connected\n")
-    return ip_client
+    connection, ip_client = tcp_connection.accept()
+    print(f"\nThe client with {ip_client[0]} ip has connected\n")
+    return connection, ip_client
 
 
 def close_connection(tcp_connection):
@@ -55,13 +52,8 @@ def close_connection(tcp_connection):
     :param tcp_connection:
 
     """
-    option = input("Do you wanna close the connection (1-Y, 0-N)? ")
-
-    if option is True:
-        # closing and exiting the program
-        print("Ending the connection and exit the program...")
-        tcp_connection.close()
-        exit()
+    print("Ending the connection and exit the program...")
+    tcp_connection.close()
 
 
 def listening(tcp_connection, ip_client):
@@ -72,16 +64,26 @@ def listening(tcp_connection, ip_client):
     :return: the messages through the print function
 
     """
-    print("If you wanna terminate the connection type exit\n")
-    while True:
-        recv_message = tcp_connection.recv(BUFFER)
-        if recv_message is not None and recv_message != 'exit':
-            print(f" Client {ip_client} message:\n {recv_message}")
-        if recv_message == 'exit':
-            # The client can terminate the connection
-            close_connection()
 
-    # else: do nothing
+    print("Starting the chart ...\n")
+    sending_message = None
+    sending_message_one = input("You: ")
+    tcp_connection.send(bytes(sending_message_one, "utf8"))
+    while True:
+        recv_message = tcp_connection.recv(BUFFER).decode("ascii")
+        print(len(recv_message))
+        if recv_message is not None and recv_message != 'exit':
+            print(f"Client {ip_client[0]} message: {recv_message}")
+            if recv_message == 'exit':
+                # The client can terminate the connection
+                break
+        else:
+            sending_message = input("You: ")
+
+        if sending_message is not None:
+            tcp_connection.send(bytes(sending_message, "utf8"))
+
+    close_connection(tcp_connection)
 
 
 if __name__ == '__main__':
@@ -90,13 +92,7 @@ if __name__ == '__main__':
         made by the bind_to_the_server()
     """
     current_connection = bind_to_the_server()
-    client = client_confirmation(current_connection)
-    listening(current_connection, client)
+    accept_connection, client = client_confirmation(current_connection)
+    listening(accept_connection, client)
 
-    # if the connection wasn't closed
-    try:
-        current_connection.close()
-    except ConnectionError as err:
-        # the connection is already closed
-        pass
     exit()

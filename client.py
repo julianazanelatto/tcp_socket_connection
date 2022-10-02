@@ -77,16 +77,29 @@ def close_connection(tcp_connection):
 
 
 def conversation(tcp_connection):
-    print("To exit the conversation press: exit")
-    while True:
-        message = input("you: ")
-        if message == 'exit':
-            break
-        tcp_connection.send(bytes(message, "utf8"))
 
-    option = input('\nDo you want to close the connection (1-Y, 0-N)? ')
-    if option == 1:
-        close_connection(tcp_connection)
+    print("Starting the chat!\n\nObs: To exit the conversation press: exit")
+    message = None
+    message_one = input("You: ")
+    tcp_connection.send(bytes(message_one, "utf8"))
+
+    while True:
+        recv_message = tcp_connection.recv(1024).decode("ascii")
+
+        # se tiver mensagem exibe
+        if recv_message is not None:
+            print(f"Server message: {recv_message}")
+        else:
+            message = input("You: ")
+
+        #se tiver input envia
+        if message is not None:
+            tcp_connection.send(bytes(message, "utf8"))
+            if message == 'exit':
+                break
+
+    print("Exiting...")
+    close_connection(tcp_connection)
 
 
 # Press the green button in the gutter to run the script.
